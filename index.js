@@ -13,6 +13,7 @@ const resY = 0.52
 const cameraX = 23.54
 
 const globalScale = 1
+const center = canvasWidth / 2;
 
 const lineThickness = 1.5;
 const line_spacing = 1.5;
@@ -21,13 +22,14 @@ const num2 = bt.randInRange(30, 180);
 const scale = (bt.randInRange(20, 25) + 0.7);
 const lineLength = 2.5 * scale
 const eraseSize = 5 * scale
-const drawSize = 2.41 * scale
+const drawSize = 2.41// * scale
 const distanceFalloff = 4
 const heightScale = 40.9
 const noiseScale = 0.3
 const seaLevel = 16.6
 const waveScale = noiseScale * 27.55 * Math.sin(time * 0.1)
 const waveHeight = 0.16
+const divise = bt.rand() * .04 + 1.4
 
 const dx = 1 / (resX * 10)
 const dy = 1 / (resY * 10)
@@ -38,12 +40,27 @@ let maxHeights = Array(Math.floor(10 / dx)).fill(0)
 const t = new bt.Turtle();
 
 const finalLines = [];
+const borderLines = [];
 const finalLinesBounds = bt.bounds(finalLines);
 
 const createShape = (turtle, n, size) => {  
   const turnAngle = 360 / n;  for (let i = 0; i < n; i++) {
     turtle.forward(size);
     turtle.left(turnAngle);  }};
+const drawCircle = [
+  bt.nurbs([
+    [center + drawSize, 0 + center],
+    [center + drawSize / divise, drawSize / divise + center],
+    [center, 0 + drawSize / divise + center],
+    [center - drawSize / divise, drawSize / divise + center],
+    [center + -drawSize / divise, 0 + center],
+    [center - drawSize / divise, -drawSize / divise + center],
+    [center, 0 - drawSize / divise + center],
+    [center + drawSize / divise, -drawSize / divise+ center],
+    [center + drawSize, 0 + center]
+  ])
+]
+
 const createLines = (canvasWidth, canvasHeight) => {
   const t = new bt.Turtle();
   for (let i = 0; i < canvasHeight; i++) {
@@ -61,14 +78,7 @@ const createLines = (canvasWidth, canvasHeight) => {
 function go(x, y) {
   t.goTo([x * globalScale, (y - 8) * globalScale])
 }
-// Generate a list of points that forms the circle for the border
-let eraseCircle = [];
-let drawCircle = [];
 
-for (let i = 0; i < lineLength; i++) {
-  eraseCircle.push([canvasWidth / 2 + eraseSize * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + eraseSize * Math.sin(2 * Math.PI * i / lineLength)]);
-  drawCircle.push([canvasWidth / 2 + drawSize * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + drawSize * Math.sin(2 * Math.PI * i / lineLength)]);
-}
 function genHeight(x, y) {
   let height =
     (bt.noise([x * noiseScale + cameraX, Math.pow(y, 1.4) * noiseScale]) *
@@ -92,9 +102,6 @@ function drawLandscape() {
         t.up()
       }
       if (height + y / 2 >= maxHeights[Math.floor(x / dx)]) {
-        //if (Math.random() > +0.62 && height * (y + distanceFalloff) > +12.53) {
-          //drawTree(x, height + y / 2, 0.96 / (y + 5.9))
-        //}
         go(x, y / 2 + height)
         maxHeights[Math.floor(x / dx)] = height + y / 2
       } else {
@@ -110,14 +117,18 @@ function drawLandscape() {
 
 drawLandscape()
 const lines = createLines(canvasWidth, canvasHeight);
+//const eraseCircle = createCircle(360, eraseSize);
 bt.scale(t.path, canvasWidth/bt.bounds(t.path).width);
 bt.translate(t.path, [canvasWidth/2, -24], bt.bounds(t.path).cb);
 bt.translate(lines, [canvasWidth / 2, canvasHeight / 2], bt.bounds(lines).cc);
-drawLines([eraseCircle], { stroke: "none", fill: "black" });
-drawLines([drawCircle], { stroke: "none", fill: "white" });
+//drawLines([eraseCircle], { stroke: "none", fill: "black" });
+//drawLines([drawCircle], { stroke: "none", fill: "white" });
 bt.join(finalLines, lines);
 bt.join(finalLines, t.path);
-
+//bt.join(borderLines, eraseCircle);
+//bt.join(borderLines, drawCircle);
+drawLines(drawCircle, { fill: "#FCE9BB", stroke: "#FCE9BB" });
 
 
 drawLines(finalLines);
+//drawLines([borderLines]);
