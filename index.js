@@ -7,17 +7,22 @@
 const canvasWidth = 125;
 const canvasHeight = 125;
 
-const frameType = "default"  //The current frames available are: "default", "spiral"
+const frameType = "default"  //The current frames available are: "default", "ribbon"
 const resX = 5.16
 const resY = 0.52
 
 
 //Cusomization
 const isNight = false;
-const sunRadius = 5;
+const isCloudy = true;
+const sunMoonRadius = 5;
 const sunRays = 23;
+const moonClipOffsetX = 0.5;
+const moonClipOffsetY = -0.4;
 const starCount = bt.randInRange(15, 40);
 const starSize =  0.75;
+const cloudSize =  1;
+const cloudCount = 20;
 
 const scale = (bt.randInRange(20, 25) + 0.7);
 
@@ -50,7 +55,9 @@ const waveScale = noiseScale * 27.55 * Math.sin(time * 0.1)
 let maxHeights = Array(Math.floor(10 / dx)).fill(0)
 
 const t = new bt.Turtle();
-const t2 = new bt.Turtle();
+const sun = new bt.Turtle();
+const moon = new bt.Turtle();
+const t4 = new bt.Turtle();
 
 const finalLines = [];
 const borderLines = [];
@@ -139,14 +146,23 @@ function drawLandscape() {
     go(0, 0)
   }
 }
-function sunRaycast() {
+let sunCircle = [];
+let moonCircle = [];
+
+function drawSun() {
   if (!isNight) {
-    t2.jump([(canvasWidth / 2) - sunRadius * 2, canvasHeight / 2]).setAngle(270).down().arc(360, sunRadius); // circle
+    sun.jump([(canvasWidth / 2) - sunMoonRadius * 2, canvasHeight / 2]).setAngle(270).down().arc(360, sunMoonRadius); // circle
     for (let i = 1; i < sunRays + 1; i++) {
       let angle = -i / (sunRays + 1) * 380;
       let distance = i % 2 == 1 ? 11 : 9;
-      t2.jump([canvasWidth / 2 , canvasHeight / 2]).setAngle(270).down().arc(angle, sunRadius); // go to pos
-      t2.setAngle(angle).up().forward(0.2).down().forward(distance); // sun ray
+      sun.jump([canvasWidth / 2 , canvasHeight / 2]).setAngle(270).down().arc(angle, sunMoonRadius); // go to pos
+      sun.setAngle(angle).up().forward(0.2).down().forward(distance); // sun ray
+    }
+  };
+  if (isNight) { 
+    for (let i = 0; i < lineLength; i++) {
+    sunCircle.push([canvasWidth / 2 + (sunMoonRadius) * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + (sunMoonRadius) * Math.sin(2 * Math.PI * i / lineLength)]);
+    moonCircle.push([canvasWidth / 2 + (moonClipOffsetX) + (sunMoonRadius) * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + (moonClipOffsetY) + (sunMoonRadius) * Math.sin(2 * Math.PI * i / lineLength)]);
     }
   }
 }
@@ -174,23 +190,63 @@ if (isNight) {
     
   }
 }
+
+    
+
+if (isCloudy) {
+  for (let i = 0; i < cloudCount; i++) {
+    const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
+    const yCenter = (0.9*Math.random()+0.05)*canvasHeight/1.75+canvasHeight/2.5;
+    const randomSize = 1.5*Math.random() + 1;
+    if (Math.min(drawSize) < randomSize * (cloudSize * 0.1)){
+      continue // Star is too close to moon or sun. It would be covered, so don't draw it.
+    }
+    t4.jump([xCenter,yCenter])
+    t4.down();
+    t4.setAngle(0);
+    t4.forward(47.54 * randomSize * 0.1);
+    t4.arc(103, 7 * randomSize * 0.1);
+    t4.setAngle(102);
+    t4.arc(86, 8 * randomSize * 0.1);
+    t4.setAngle(-93);
+    t4.arc(125, -9 * randomSize * 0.1);
+    t4.setAngle(172);
+    t4.arc(28, 23 * randomSize * 0.1);
+    t4.setAngle(145);
+    t4.arc(113, 15 * randomSize * 0.1);
+    t4.setAngle(215);
+    t4.arc(28, 7 * randomSize * 0.1);
+    t4.arc(106, 7 * randomSize * 0.1);
+  }
+}
 drawLandscape()
-sunRaycast()
+drawSun()
 const lines = createLines(canvasWidth, canvasHeight);
+const sunPolylines = [sunCircle];
+const moonPolylines = [moonCircle];
 
 bt.scale(t.path, canvasWidth / bt.bounds(t.path).width);
 bt.translate(t.path, [canvasWidth / 2, -24], bt.bounds(t.path).cb);
-//bt.translate(sun, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175, 0 - canvasHeight / 4 * scale / 20]);
-bt.translate(t2.path, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - sunRadius, 0 - canvasHeight / 4 * scale / 20]);
+bt.translate(sun.path, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175, 0 - canvasHeight / 4 * scale / 20]);
+bt.translate(sunPolylines, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - sunMoonRadius, 0 - canvasHeight / 4 * scale / 20]);
+bt.translate(moonPolylines, [canvasWidth / 2 + 2, 0 - 1], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - sunMoonRadius, 0 - canvasHeight / 4 * scale / 20]);
+
+
 bt.translate(lines, [canvasWidth / 2, canvasHeight / 2], bt.bounds(lines).cc);
 
 drawLines(stars, { stroke: "black", fill: "none" });
 
+drawLines(t.path, { stroke: "black", fill: "white" });
+
+bt.difference(sunPolylines, moonPolylines);
+drawLines(sunPolylines, { stroke: "black", fill: "white" });
+
 const subjectPolylines = [eraseCircle];
 const clippingPolylines = [drawCircle];
 bt.difference(subjectPolylines, clippingPolylines);
+drawLines(sun.path, { stroke: "black", fill: "white" });
 bt.join(borderLines, subjectPolylines);
-drawLines(t.path, { stroke: "black", fill: "white" });
-drawLines(t2.path, { stroke: "black", fill: "white" });
+drawLines(t4.path, { stroke: "black", fill: "white" });
+
 drawLines(borderLines, { stroke: "none", fill: "white" });
 drawLines(lines);
