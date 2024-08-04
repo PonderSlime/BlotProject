@@ -50,6 +50,7 @@ const waveScale = noiseScale * 27.55 * Math.sin(time * 0.1)
 let maxHeights = Array(Math.floor(10 / dx)).fill(0)
 
 const t = new bt.Turtle();
+const t2 = new bt.Turtle();
 
 const finalLines = [];
 const borderLines = [];
@@ -138,10 +139,15 @@ function drawLandscape() {
     go(0, 0)
   }
 }
-let sunCircle = [];
-if (!isNight) {
-  for (let i = 0; i < lineLength; i++) {
-    sunCircle.push([canvasWidth / 2 + sunRadius * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + sunRadius * Math.sin(2 * Math.PI * i / lineLength)]);
+function sunRaycast() {
+  if (!isNight) {
+    t2.jump([(canvasWidth / 2) - sunRadius * 2, canvasHeight / 2]).setAngle(270).down().arc(360, sunRadius); // circle
+    for (let i = 1; i < sunRays + 1; i++) {
+      let angle = -i / (sunRays + 1) * 380;
+      let distance = i % 2 == 1 ? 11 : 9;
+      t2.jump([canvasWidth / 2 , canvasHeight / 2]).setAngle(270).down().arc(angle, sunRadius); // go to pos
+      t2.setAngle(angle).up().forward(0.2).down().forward(distance); // sun ray
+    }
   }
 }
 
@@ -169,13 +175,13 @@ if (isNight) {
   }
 }
 drawLandscape()
-
+sunRaycast()
 const lines = createLines(canvasWidth, canvasHeight);
-const sun = [sunCircle];
 
 bt.scale(t.path, canvasWidth / bt.bounds(t.path).width);
-bt.translate(t.path, [canvasWidth / 2, 0], bt.bounds(t.path).cb);
-bt.translate(sun, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175, 0 - canvasHeight / 4 * scale / 20]);
+bt.translate(t.path, [canvasWidth / 2, -24], bt.bounds(t.path).cb);
+//bt.translate(sun, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175, 0 - canvasHeight / 4 * scale / 20]);
+bt.translate(t2.path, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - sunRadius, 0 - canvasHeight / 4 * scale / 20]);
 bt.translate(lines, [canvasWidth / 2, canvasHeight / 2], bt.bounds(lines).cc);
 
 drawLines(stars, { stroke: "black", fill: "none" });
@@ -185,6 +191,6 @@ const clippingPolylines = [drawCircle];
 bt.difference(subjectPolylines, clippingPolylines);
 bt.join(borderLines, subjectPolylines);
 drawLines(t.path, { stroke: "black", fill: "white" });
+drawLines(t2.path, { stroke: "black", fill: "white" });
 drawLines(borderLines, { stroke: "none", fill: "white" });
 drawLines(lines);
-drawLines(sun, { stroke: "black", fill: "none" });
