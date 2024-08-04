@@ -13,7 +13,9 @@ const resY = 0.52
 
 
 //Cusomization
-const drawStars = true;
+const isNight = false;
+const sunRadius = 5;
+const sunRays = 23;
 const starCount = bt.randInRange(15, 40);
 const starSize =  0.75;
 
@@ -47,28 +49,25 @@ const globalScale = scale
 const waveScale = noiseScale * 27.55 * Math.sin(time * 0.1)
 let maxHeights = Array(Math.floor(10 / dx)).fill(0)
 
-
 const t = new bt.Turtle();
 
 const finalLines = [];
 const borderLines = [];
-const finalLinesBounds = bt.bounds(finalLines);
-
 
 let turn1 = 0;
-  let turn2 = 0;
-  if (frameType == "default") {
-    turn1 = 34;
-    turn2 = 90;
-    drawSize = 2.0456 * scale;
-    lineLength = 2.5 * scale
-  }
-  else if (frameType == "ribbon") {
-    turn1 = 34;
-    turn2 = 83;
-    drawSize = 2.206 * scale
-    lineLength = 2.4 * scale
-  }
+let turn2 = 0;
+if (frameType == "default") {
+  turn1 = 34;
+  turn2 = 90;
+  drawSize = 2.0456 * scale;
+  lineLength = 2.5 * scale
+}
+else if (frameType == "ribbon") {
+  turn1 = 34;
+  turn2 = 83;
+  drawSize = 2.206 * scale
+  lineLength = 2.4 * scale
+}
 
 const createShape = (turtle, n, size) => {
   const turnAngle = 360 / n;
@@ -76,7 +75,7 @@ const createShape = (turtle, n, size) => {
     turtle.forward(size);
     turtle.left(turnAngle);
   }
-};
+}
 const createLines = (canvasWidth, canvasHeight) => {
   const t = new bt.Turtle();
   for (let i = 0; i < canvasHeight; i++) {
@@ -139,8 +138,15 @@ function drawLandscape() {
     go(0, 0)
   }
 }
+let sunCircle = [];
+if (!isNight) {
+  for (let i = 0; i < lineLength; i++) {
+    sunCircle.push([canvasWidth / 2 + sunRadius * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + sunRadius * Math.sin(2 * Math.PI * i / lineLength)]);
+  }
+}
+
 let stars = [];
-if (drawStars) {
+if (isNight) {
   for (let i = 0; i < starCount; i++) {
     const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
     const yCenter = (0.9*Math.random()+0.05)*canvasHeight/1.75+canvasHeight/2.5;
@@ -165,14 +171,12 @@ if (drawStars) {
 drawLandscape()
 
 const lines = createLines(canvasWidth, canvasHeight);
+const sun = [sunCircle];
+
 bt.scale(t.path, canvasWidth / bt.bounds(t.path).width);
-bt.translate(t.path, [canvasWidth / 2, -24], bt.bounds(t.path).cb);
+bt.translate(t.path, [canvasWidth / 2, 0], bt.bounds(t.path).cb);
+bt.translate(sun, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175, 0 - canvasHeight / 4 * scale / 20]);
 bt.translate(lines, [canvasWidth / 2, canvasHeight / 2], bt.bounds(lines).cc);
-
-bt.join(finalLines, t.path);
-
-
-
 
 drawLines(stars, { stroke: "black", fill: "none" });
 
@@ -183,3 +187,4 @@ bt.join(borderLines, subjectPolylines);
 drawLines(t.path, { stroke: "black", fill: "white" });
 drawLines(borderLines, { stroke: "none", fill: "white" });
 drawLines(lines);
+drawLines(sun, { stroke: "black", fill: "none" });
