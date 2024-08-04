@@ -29,8 +29,14 @@ const waveScale = noiseScale * 27.55 * Math.sin(time * 0.1)
 const waveHeight = 0.16
 const globalScale = scale
 
+const drawStars = true;
+const starCount = bt.randInRange(15, 40);
+const starSize =  0.75;
+
 const dx = 1 / (resX * 10)
 const dy = 1 / (resY * 10)
+const xCenter = canvasWidth / 2
+const yCenter = canvasHeight / 2
 
 setDocDimensions(canvasWidth, canvasHeight);
 let maxHeights = Array(Math.floor(10 / dx)).fill(0)
@@ -110,8 +116,31 @@ function drawLandscape() {
     go(0, 0)
   }
 }
-
+let stars = [];
+if (drawStars) {
+  for (let i = 0; i < starCount; i++) {
+    const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
+    const yCenter = (0.9*Math.random()+0.05)*canvasHeight+canvasHeight/3;
+    const randomSize = 1.5*Math.random() + 0.5;
+    if (Math.min(drawSize) < randomSize * starSize){
+      continue // Star is too close to moon or sun. It would be covered, so don't draw it.
+    }
+    let star = [
+      [xCenter+starSize*randomSize,yCenter],
+      [xCenter+starSize*randomSize*0.2,yCenter+starSize*randomSize*0.2],
+      [xCenter,yCenter+starSize*randomSize],
+      [xCenter-starSize*randomSize*0.2,yCenter+starSize*randomSize*0.2],
+      [xCenter-starSize*randomSize,yCenter],
+      [xCenter-starSize*randomSize*0.2,yCenter-starSize*randomSize*0.2],
+      [xCenter,yCenter-starSize*randomSize],
+      [xCenter+starSize*randomSize*0.2,yCenter-starSize*randomSize*0.2],
+      [xCenter+starSize*randomSize,yCenter]]
+      stars.push(star);
+    
+  }
+}
 drawLandscape()
+
 const lines = createLines(canvasWidth, canvasHeight);
 bt.scale(t.path, canvasWidth / bt.bounds(t.path).width);
 bt.translate(t.path, [canvasWidth / 2, -24], bt.bounds(t.path).cb);
@@ -122,10 +151,12 @@ bt.join(finalLines, t.path);
 
 
 
-drawLines(finalLines);
+drawLines(stars, { stroke: "black", fill: "none" });
+
 const subjectPolylines = [eraseCircle];
 const clippingPolylines = [drawCircle];
 bt.difference(subjectPolylines, clippingPolylines);
 bt.join(borderLines, subjectPolylines);
+drawLines(t.path, { stroke: "black", fill: "white" });
 drawLines(borderLines, { stroke: "none", fill: "white" });
 drawLines(lines);
