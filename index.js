@@ -1,14 +1,14 @@
 /*
 @title: framed_landscape
 @author: PonderSlime
-@snapshot: the name of the snapshot file you want in the gallery
+@snapshot: example1.png
 */
-
 const canvasWidth = 125;
 const canvasHeight = 125;
 
 
 /* ======= Customization ======= */
+
 const frameType = "default"  //The current frames available are: "default", "ribbon"
 const scale = (bt.randInRange(20, 25) + 0.7);    //Scale of the border
 
@@ -29,6 +29,7 @@ const seaLevel = 16.6;    // Height of the water
 
 const noiseScale = bt.randInRange(0.3, 0.5);    // Noise randomization of terrain
 const waveHeight = 0.16;    // Height of waves in the ocean
+
 /* ======= End of Customization ======= */
 
 setDocDimensions(canvasWidth, canvasHeight);
@@ -171,9 +172,9 @@ if (isNight) {
   cloudHeightSize = 6
   cloudHeight = 2.1
   for (let i = 0; i < starCount; i++) {
-    const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
-    const yCenter = (0.9*Math.random()+0.05)*canvasHeight/1.75+canvasHeight/2.5;
-    const randomSize = 1.5*Math.random() + 0.5;
+    const xCenter = (0.9*bt.randInRange(0,1)+0.05)*canvasWidth;
+    const yCenter = (0.9*bt.randInRange(0,1)+0.05)*canvasHeight/1.75+canvasHeight/2.5;
+    const randomSize = 1.5*bt.randInRange(0,1) + 0.5;
     let star = [
       [xCenter+starSize*randomSize,yCenter],
       [xCenter+starSize*randomSize*0.2,yCenter+starSize*randomSize*0.2],
@@ -195,10 +196,10 @@ if (!isNight) {
 }
 if (isCloudy) {
   for (let i = 0; i < cloudCount; i++) {
-    const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
-    const yCenter = (0.9*Math.random()+0.05)*canvasHeight/cloudHeightSize+canvasHeight/cloudHeight;
-    const randomSize = (1.5*Math.random() + 1) * (cloudSize)*0.15;
-    let cloudType = Math.floor(Math.random() * 2)
+    const xCenter = (0.9*bt.randInRange(0,1)+0.05)*canvasWidth;
+    const yCenter = (0.9*bt.randInRange(0,1)+0.05)*canvasHeight/cloudHeightSize+canvasHeight/cloudHeight;
+    const randomSize = (1.5*bt.randInRange(0,1) + 1) * (cloudSize)*0.15;
+    let cloudType = bt.randIntInRange(0,2);
       ;
     if (Math.min(drawSize) < randomSize * (cloudSize * 0.1)){
       continue // Star is too close to moon or sun. It would be covered, so don't draw it.
