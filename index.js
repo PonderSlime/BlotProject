@@ -7,52 +7,49 @@
 const canvasWidth = 125;
 const canvasHeight = 125;
 
+
+/* ======= Customization ======= */
 const frameType = "default"  //The current frames available are: "default", "ribbon"
+const scale = (bt.randInRange(20, 25) + 0.7);    //Scale of the border
+
+const isNight = true;    //Render night sky
+const isCloudy = false;    // Render clouds
+const moonRadius = 5; // Size of moon
+const sunRays = 23;    // How many sun rays to spawn
+
+const starCount = bt.randInRange(15, 40);    // How many stars to spawn
+const starSize =  0.75;    // What size of stars do you want?
+const cloudSize =  1;    // What s8ize of clouds do you want?
+
+const cloudCount = 12;    // How many clouds to spawn
+
+const distanceFalloff = 4;    // Distance falloff of terrain
+const heightScale = 40.9;    // Multiply the terrain height by this
+const seaLevel = 16.6;    // Height of the water
+
+const noiseScale = bt.randInRange(0.3, 0.5);    // Noise randomization of terrain
+const waveHeight = 0.16;    // Height of waves in the ocean
+/* ======= End of Customization ======= */
+
+setDocDimensions(canvasWidth, canvasHeight);
+
 const resX = 5.16
 const resY = 0.52
 
-
-//Cusomization
-const isNight = false;
-const isCloudy = true;
-const sunMoonRadius = 5;
-const sunRays = 23;
+const cameraX = 23.54;
+const time = 106;
+let lineLength;
+const eraseSize = 5 * 25;
+let drawSize;
+const dx = 1 / (resX * 10);
+const dy = 1 / (resY * 10);
+const xCenter = canvasWidth / 2;
+const yCenter = canvasHeight / 2;
+const globalScale = scale;
+const waveScale = noiseScale * 27.55 * Math.sin(time * 0.1);
+let maxHeights = Array(Math.floor(10 / dx)).fill(0);
 const moonClipOffsetX = 0.5;
 const moonClipOffsetY = -0.4;
-const starCount = bt.randInRange(15, 40);
-const starSize =  0.75;
-const cloudSize =  1;
-const cloudCount = 20;
-
-const scale = (bt.randInRange(20, 25) + 0.7);
-
-const lineThickness = 1.5;
-const line_spacing = 1.5;
-const num1 = bt.randInRange(30, 180);
-const num2 = bt.randInRange(30, 180);
-
-const distanceFalloff = 4
-const heightScale = 40.9
-const seaLevel = 16.6
-
-const noiseScale = bt.randInRange(0.3, 0.5);
-const waveHeight = 0.16
-//End of Customization
-
-
-setDocDimensions(canvasWidth, canvasHeight);
-const cameraX = 23.54
-const time = 106
-let lineLength;
-const eraseSize = 5 * 25
-let drawSize;
-const dx = 1 / (resX * 10)
-const dy = 1 / (resY * 10)
-const xCenter = canvasWidth / 2
-const yCenter = canvasHeight / 2
-const globalScale = scale
-const waveScale = noiseScale * 27.55 * Math.sin(time * 0.1)
-let maxHeights = Array(Math.floor(10 / dx)).fill(0)
 
 const t = new bt.Turtle();
 const sun = new bt.Turtle();
@@ -64,6 +61,8 @@ const borderLines = [];
 
 let turn1 = 0;
 let turn2 = 0;
+let cloudHeight = 2.5;
+let cloudHeightSize = 3;
 if (frameType == "default") {
   turn1 = 34;
   turn2 = 90;
@@ -146,36 +145,35 @@ function drawLandscape() {
     go(0, 0)
   }
 }
-let sunCircle = [];
+let moonFaceCircle = [];
 let moonCircle = [];
 
 function drawSun() {
   if (!isNight) {
-    sun.jump([(canvasWidth / 2) - sunMoonRadius * 2, canvasHeight / 2]).setAngle(270).down().arc(360, sunMoonRadius); // circle
+    sun.jump([(canvasWidth / 2) - moonRadius * 2, canvasHeight / 2]).setAngle(270).down().arc(360, moonRadius); // circle
     for (let i = 1; i < sunRays + 1; i++) {
       let angle = -i / (sunRays + 1) * 380;
-      let distance = i % 2 == 1 ? 11 : 9;
-      sun.jump([canvasWidth / 2 , canvasHeight / 2]).setAngle(270).down().arc(angle, sunMoonRadius); // go to pos
+      let distance = i % 2 == 1 ? 11 : 8;
+      sun.jump([canvasWidth / 2 , canvasHeight / 2]).setAngle(270).down().arc(angle, moonRadius); // go to pos
       sun.setAngle(angle).up().forward(0.2).down().forward(distance); // sun ray
     }
   };
-  if (isNight) { 
+  if (isNight) {
     for (let i = 0; i < lineLength; i++) {
-    sunCircle.push([canvasWidth / 2 + (sunMoonRadius) * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + (sunMoonRadius) * Math.sin(2 * Math.PI * i / lineLength)]);
-    moonCircle.push([canvasWidth / 2 + (moonClipOffsetX) + (sunMoonRadius) * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + (moonClipOffsetY) + (sunMoonRadius) * Math.sin(2 * Math.PI * i / lineLength)]);
+    moonFaceCircle.push([canvasWidth / 2 + (moonRadius) * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + (moonRadius) * Math.sin(2 * Math.PI * i / lineLength)]);
+    moonCircle.push([canvasWidth / 2 + (moonClipOffsetX) + (moonRadius) * Math.cos(2 * Math.PI * i / lineLength), canvasHeight / 2 + (moonClipOffsetY) + (moonRadius) * Math.sin(2 * Math.PI * i / lineLength)]);
     }
   }
 }
 
 let stars = [];
 if (isNight) {
+  cloudHeightSize = 6
+  cloudHeight = 2.1
   for (let i = 0; i < starCount; i++) {
     const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
     const yCenter = (0.9*Math.random()+0.05)*canvasHeight/1.75+canvasHeight/2.5;
     const randomSize = 1.5*Math.random() + 0.5;
-    if (Math.min(drawSize) < randomSize * starSize){
-      continue // Star is too close to moon or sun. It would be covered, so don't draw it.
-    }
     let star = [
       [xCenter+starSize*randomSize,yCenter],
       [xCenter+starSize*randomSize*0.2,yCenter+starSize*randomSize*0.2],
@@ -190,13 +188,15 @@ if (isNight) {
     
   }
 }
-
     
-
+if (!isNight) {
+  cloudHeight = 2.5
+  cloudHeightSize = 3;
+}
 if (isCloudy) {
   for (let i = 0; i < cloudCount; i++) {
     const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
-    const yCenter = (0.9*Math.random()+0.05)*canvasHeight/1.75+canvasHeight/2.5;
+    const yCenter = (0.9*Math.random()+0.05)*canvasHeight/cloudHeightSize+canvasHeight/cloudHeight;
     const randomSize = (1.5*Math.random() + 1) * (cloudSize)*0.15;
     let cloudType = Math.floor(Math.random() * 2)
       ;
@@ -248,15 +248,15 @@ if (isCloudy) {
 drawLandscape()
 drawSun()
 const lines = createLines(canvasWidth, canvasHeight);
-const sunPolylines = [sunCircle];
+const moonFacePolylines = [moonFaceCircle];
 const moonPolylines = [moonCircle];
+const moonPolylines2 = [moonCircle];
 
 bt.scale(t.path, canvasWidth / bt.bounds(t.path).width);
 bt.translate(t.path, [canvasWidth / 2, -24], bt.bounds(t.path).cb);
 bt.translate(sun.path, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175, 0 - canvasHeight / 4 * scale / 20]);
-bt.translate(sunPolylines, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - sunMoonRadius, 0 - canvasHeight / 4 * scale / 20]);
-bt.translate(moonPolylines, [canvasWidth / 2 + 2, 0 - 1], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - sunMoonRadius, 0 - canvasHeight / 4 * scale / 20]);
-
+bt.translate(moonFacePolylines, [canvasWidth / 2, 0], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - moonRadius, 0 - canvasHeight / 5 * scale / 20]);
+bt.translate(moonPolylines, [canvasWidth / 2 + 2, 0 - 1], [canvasWidth - canvasWidth / 3 * scale / 4 + 175 - moonRadius, 0 - canvasHeight / 5 * scale / 20]);
 
 bt.translate(lines, [canvasWidth / 2, canvasHeight / 2], bt.bounds(lines).cc);
 
@@ -264,8 +264,9 @@ drawLines(stars, { stroke: "black", fill: "white" });
 
 drawLines(t.path, { stroke: "black", fill: "white" });
 
-bt.difference(sunPolylines, moonPolylines);
-drawLines(sunPolylines, { stroke: "black", fill: "white" });
+bt.difference(moonFacePolylines, moonPolylines);
+drawLines(moonPolylines2, { stroke: "white", fill: "white" });
+drawLines(moonFacePolylines, { stroke: "black", fill: "white" });
 
 const subjectPolylines = [eraseCircle];
 const clippingPolylines = [drawCircle];
