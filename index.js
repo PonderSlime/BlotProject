@@ -86,7 +86,7 @@ const createShape = (turtle, n, size) => {
 }
 const createLines = (canvasWidth, canvasHeight) => {
   const t = new bt.Turtle();
-  for (let i = 0; i < canvasHeight; i++) {
+  for (let i = 0; i < canvasHeight / 1.5; i++) {
     t.forward(lineLength);
     t.up();
     t.left(turn1);
@@ -197,26 +197,52 @@ if (isCloudy) {
   for (let i = 0; i < cloudCount; i++) {
     const xCenter = (0.9*Math.random()+0.05)*canvasWidth;
     const yCenter = (0.9*Math.random()+0.05)*canvasHeight/1.75+canvasHeight/2.5;
-    const randomSize = 1.5*Math.random() + 1;
+    const randomSize = (1.5*Math.random() + 1) * (cloudSize)*0.15;
+    let cloudType = Math.floor(Math.random() * 2)
+      ;
     if (Math.min(drawSize) < randomSize * (cloudSize * 0.1)){
       continue // Star is too close to moon or sun. It would be covered, so don't draw it.
     }
-    t4.jump([xCenter,yCenter])
-    t4.down();
-    t4.setAngle(0);
-    t4.forward(47.54 * randomSize * 0.1);
-    t4.arc(103, 7 * randomSize * 0.1);
-    t4.setAngle(102);
-    t4.arc(86, 8 * randomSize * 0.1);
-    t4.setAngle(-93);
-    t4.arc(125, -9 * randomSize * 0.1);
-    t4.setAngle(172);
-    t4.arc(28, 23 * randomSize * 0.1);
-    t4.setAngle(145);
-    t4.arc(113, 15 * randomSize * 0.1);
-    t4.setAngle(215);
-    t4.arc(28, 7 * randomSize * 0.1);
-    t4.arc(106, 7 * randomSize * 0.1);
+    if (cloudType == 0) {
+      cloudType = 1
+    }
+    if (cloudType == 1) {
+      t4.jump([xCenter,yCenter])
+      t4.down();
+      t4.setAngle(0);
+      t4.forward(47.54 * randomSize);
+      t4.arc(103, 7 * randomSize);
+      t4.setAngle(102);
+      t4.arc(86, 8 * randomSize);
+      t4.setAngle(-93);
+      t4.arc(125, -9 * randomSize);
+      t4.setAngle(172);
+      t4.arc(28, 23 * randomSize);
+      t4.setAngle(145);
+      t4.arc(113, 15 * randomSize);
+      t4.setAngle(215);
+      t4.arc(28, 7 * randomSize);
+      t4.arc(106, 7 * randomSize);
+    }
+    else if (cloudType == 2) {
+      t4.jump([xCenter,yCenter])
+      t4.down();
+      t4.setAngle(0);
+      t4.forward(36.28 * randomSize);
+      t4.arc(110, 8 * randomSize);
+      t4.setAngle(102);
+      t4.arc(48, 10 * randomSize);
+      t4.setAngle(75);
+      t4.arc(121, 6* randomSize);
+      t4.setAngle(90);
+      t4.arc(125, 8 * randomSize);
+      t4.setAngle(136);
+      t4.arc(127, 8* randomSize);
+      t4.setAngle(160);
+      t4.arc(127, 10* randomSize);
+      t4.setAngle(235.55);
+      t4.arc(124.96, 9* randomSize);
+    }
   }
 }
 drawLandscape()
@@ -234,7 +260,7 @@ bt.translate(moonPolylines, [canvasWidth / 2 + 2, 0 - 1], [canvasWidth - canvasW
 
 bt.translate(lines, [canvasWidth / 2, canvasHeight / 2], bt.bounds(lines).cc);
 
-drawLines(stars, { stroke: "black", fill: "none" });
+drawLines(stars, { stroke: "black", fill: "white" });
 
 drawLines(t.path, { stroke: "black", fill: "white" });
 
