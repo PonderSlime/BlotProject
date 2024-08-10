@@ -56,6 +56,7 @@ const t = new bt.Turtle();
 const sun = new bt.Turtle();
 const moon = new bt.Turtle();
 const t4 = new bt.Turtle();
+const t5 = new bt.Turtle();
 
 const finalLines = [];
 const borderLines = [];
@@ -166,6 +167,16 @@ function drawSun() {
     }
   }
 }
+let cut = [];
+function drawCut() {
+  t5.forward(canvasHeight)
+  t5.left(90)
+  t5.forward(canvasWidth)
+  t5.left(90)
+  t5.forward(canvasHeight)
+  t5.left(90)
+  t5.forward(canvasWidth)
+}
 
 let stars = [];
 if (isNight) {
@@ -248,6 +259,7 @@ if (isCloudy) {
 }
 drawLandscape()
 drawSun()
+
 const lines = createLines(canvasWidth, canvasHeight);
 const moonFacePolylines = [moonFaceCircle];
 const moonPolylines = [moonCircle];
@@ -268,8 +280,8 @@ drawLines(t.path, { stroke: "black", fill: "white" });
 bt.difference(moonFacePolylines, moonPolylines);
 drawLines(moonPolylines2, { stroke: "white", fill: "white" });
 drawLines(moonFacePolylines, { stroke: "black", fill: "white" });
-
-const subjectPolylines = [eraseCircle];
+drawCut()
+const subjectPolylines = t5.path;
 const clippingPolylines = [drawCircle];
 bt.difference(subjectPolylines, clippingPolylines);
 drawLines(sun.path, { stroke: "black", fill: "white" });
@@ -278,3 +290,5 @@ drawLines(t4.path, { stroke: "black", fill: "white" });
 
 drawLines(borderLines, { stroke: "none", fill: "white" });
 drawLines(lines);
+
+drawLines(t5.path, { stroke: "black", fill: "none" });
