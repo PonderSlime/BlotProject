@@ -291,4 +291,4 @@ drawLines(t4.path, { stroke: "black", fill: "white" });
 drawLines(borderLines, { stroke: "none", fill: "white" });
 drawLines(lines);
 
-drawLines(t5.path, { stroke: "black", fill: "none" });
+drawLines(t5.path, { stroke: "none", fill: "none" });
