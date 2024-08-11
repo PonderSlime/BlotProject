@@ -12,8 +12,8 @@ const canvasHeight = 125;
 const frameType = "default"  //The current frames available are: "default", "ribbon"
 const scale = (bt.randInRange(20, 25) + 0.7);    //Scale of the border
 
-const isNight = true;    //Render night sky
-const isCloudy = false;    // Render clouds
+const isNight = false;    //Render night sky
+const isCloudy = true;    // Render clouds
 const moonRadius = 5; // Size of moon
 const sunRays = 23;    // How many sun rays to spawn
 
@@ -153,12 +153,12 @@ let moonCircle = [];
 function drawSun() {
   if (!isNight) {
     sun.jump([(canvasWidth / 2) - moonRadius * 2, canvasHeight / 2]).setAngle(270).down().arc(360, moonRadius); // circle
-    for (let i = 1; i < sunRays + 1; i++) {
+    /*for (let i = 1; i < sunRays + 1; i++) {
       let angle = -i / (sunRays + 1) * 380;
       let distance = i % 2 == 1 ? 11 : 8;
       sun.jump([canvasWidth / 2 , canvasHeight / 2]).setAngle(270).down().arc(angle, moonRadius); // go to pos
       sun.setAngle(angle).up().forward(0.2).down().forward(distance); // sun ray
-    }
+    }*/
   };
   if (isNight) {
     for (let i = 0; i < lineLength; i++) {
@@ -207,7 +207,7 @@ if (!isNight) {
 }
 if (isCloudy) {
   for (let i = 0; i < cloudCount; i++) {
-    const xCenter = (0.9*bt.randInRange(0,1)+0.05)*canvasWidth;
+    const xCenter = (0.9*bt.randInRange(0,1)+0.05)*(canvasWidth - (canvasWidth*0.1));
     const yCenter = (0.9*bt.randInRange(0,1)+0.05)*canvasHeight/cloudHeightSize+canvasHeight/cloudHeight;
     const randomSize = (1.5*bt.randInRange(0,1) + 1) * (cloudSize)*0.15;
     let cloudType = bt.randIntInRange(0,2);
@@ -259,11 +259,21 @@ if (isCloudy) {
 }
 drawLandscape()
 drawSun()
+drawCut()
 
 const lines = createLines(canvasWidth, canvasHeight);
 const moonFacePolylines = [moonFaceCircle];
 const moonPolylines = [moonCircle];
-const moonPolylines2 = [moonCircle];
+
+
+const subjectPolylines = t5.path;
+const clippingPolylines = [drawCircle];
+
+
+bt.difference(subjectPolylines, clippingPolylines);
+bt.join(borderLines, subjectPolylines);
+var coverLand
+bt.cover(t.path, borderLines);
 
 bt.scale(t.path, canvasWidth / bt.bounds(t.path).width);
 bt.translate(t.path, [canvasWidth / 2, -24], bt.bounds(t.path).cb);
@@ -273,22 +283,24 @@ bt.translate(moonPolylines, [canvasWidth / 2 + 2, 0 - 1], [canvasWidth - canvasW
 
 bt.translate(lines, [canvasWidth / 2, canvasHeight / 2], bt.bounds(lines).cc);
 
-drawLines(stars, { stroke: "black", fill: "white" });
 
-drawLines(t.path, { stroke: "black", fill: "white" });
+drawLines(bt.difference(t.path, borderLines));
+
+drawLines(bt.difference(sun.path, borderLines));
+drawLines(bt.difference(t4.path, borderLines));
+drawLines(bt.difference(stars, borderLines));
+drawLines(coverLand);
+drawLines(stars, { stroke: "black", fill: "none" });
 
 bt.difference(moonFacePolylines, moonPolylines);
-drawLines(moonPolylines2, { stroke: "white", fill: "white" });
-drawLines(moonFacePolylines, { stroke: "black", fill: "white" });
-drawCut()
-const subjectPolylines = t5.path;
-const clippingPolylines = [drawCircle];
-bt.difference(subjectPolylines, clippingPolylines);
-drawLines(sun.path, { stroke: "black", fill: "white" });
-bt.join(borderLines, subjectPolylines);
-drawLines(t4.path, { stroke: "black", fill: "white" });
+drawLines(moonFacePolylines, { stroke: "black", fill: "none" });
 
-drawLines(borderLines, { stroke: "none", fill: "white" });
+
+bt.difference(moonFacePolylines, moonPolylines);
+drawLines(sun.path, { stroke: "black", fill: "none" });
+
+drawLines(t4.path, { stroke: "black", fill: "none" });
+
+drawLines(borderLines, { stroke: "none"});
 drawLines(lines);
 
-drawLines(t5.path, { stroke: "none", fill: "none" });
